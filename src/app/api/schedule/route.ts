@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { sendLineWorksMessage } from "@/lib/lineworks";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -133,6 +134,33 @@ function buildCandidateHtml(b: ScheduleBody): string {
 </div>`;
 }
 
+function buildLineWorksMessage(b: ScheduleBody): string {
+  return [
+    "📅 面談希望日が届きました",
+    "",
+    "■ 氏名",
+    `${b.lastName} ${b.firstName}`,
+    "",
+    "■ メールアドレス",
+    b.email,
+    "",
+    "■ 面談形式",
+    b.meetingFormat,
+    "",
+    "■ 第1希望日時",
+    fmtSlot(b.slot1),
+    "",
+    "■ 第2希望日時",
+    fmtSlot(b.slot2),
+    "",
+    "■ 第3希望日時",
+    fmtSlot(b.slot3),
+    "",
+    "■ ご連絡事項",
+    b.comment || "なし",
+  ].join("\n");
+}
+
 export async function POST(request: Request) {
   try {
     const body: ScheduleBody = await request.json();
@@ -142,29 +170,44 @@ export async function POST(request: Request) {
       return Response.json({ error: validationError }, { status: 400 });
     }
 
-    const resend = getResend();
+    const emailPromise = (async () => {
+      try {
+        const resend = getResend();
+        await Promise.all([
+          resend.emails.send({
+            from: "BizStudio 日程調整 <no-reply@bizstudio.co.jp>",
+            to: "agent@bizstudio.co.jp",
+            subject: `【スカウト日程調整】${body.lastName} ${body.firstName} 様より希望日が届きました`,
+            html: buildInternalHtml(body),
+          }),
+          resend.emails.send({
+            from: "株式会社ビズスタジオ <no-reply@bizstudio.co.jp>",
+            to: body.email,
+            replyTo: "agent@bizstudio.co.jp",
+            subject: "【株式会社ビズスタジオ】面談希望日を受け付けました",
+            html: buildCandidateHtml(body),
+          }),
+        ]);
+      } catch (error) {
+        console.error("Email send error:", error);
+      }
+    })();
 
-    await Promise.all([
-      resend.emails.send({
-        from: "BizStudio 日程調整 <no-reply@bizstudio.co.jp>",
-        to: "agent@bizstudio.co.jp",
-        subject: `【スカウト日程調整】${body.lastName} ${body.firstName} 様より希望日が届きました`,
-        html: buildInternalHtml(body),
-      }),
-      resend.emails.send({
-        from: "株式会社ビズスタジオ <no-reply@bizstudio.co.jp>",
-        to: body.email,
-        replyTo: "agent@bizstudio.co.jp",
-        subject: "【株式会社ビズスタジオ】面談希望日を受け付けました",
-        html: buildCandidateHtml(body),
-      }),
-    ]);
+    const lineWorksPromise = (async () => {
+      try {
+        await sendLineWorksMessage(buildLineWorksMessage(body));
+      } catch (error) {
+        console.error("LINE WORKS send error:", error);
+      }
+    })();
+
+    await Promise.all([emailPromise, lineWorksPromise]);
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error("Email send error:", error);
+    console.error("Schedule API error:", error);
     return Response.json(
-      { error: "メールの送信に失敗しました。しばらくしてからもう一度お試しください。" },
+      { error: "送信処理に失敗しました。しばらくしてからもう一度お試しください。" },
       { status: 500 },
     );
   }
