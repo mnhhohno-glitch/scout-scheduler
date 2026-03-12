@@ -7,41 +7,23 @@ const METHOD_LABELS: Record<string, string> = {
   flexible: "どちらでも可",
 };
 
-interface DecodedParams {
-  cn: string;
-  an: string;
-  im: string;
-}
-
-function decodeParams(d: string): DecodedParams | null {
-  try {
-    const decoded = decodeURIComponent(escape(atob(d)));
-    const parsed = JSON.parse(decoded);
-    if (!parsed.cn || !parsed.an || !parsed.im) return null;
-    if (!METHOD_LABELS[parsed.im]) return null;
-    return parsed as DecodedParams;
-  } catch {
-    return null;
-  }
-}
-
 export default async function InterviewPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { d } = await searchParams;
+  const { cn, an, im } = await searchParams;
 
-  if (!d || typeof d !== "string") {
+  if (
+    !cn || typeof cn !== "string" ||
+    !an || typeof an !== "string" ||
+    !im || typeof im !== "string" ||
+    !METHOD_LABELS[im]
+  ) {
     return <ErrorView />;
   }
 
-  const params = decodeParams(d);
-  if (!params) {
-    return <ErrorView />;
-  }
-
-  const methodLabel = METHOD_LABELS[params.im];
+  const methodLabel = METHOD_LABELS[im];
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -64,8 +46,8 @@ export default async function InterviewPage({
         </div>
 
         <InterviewScheduleForm
-          candidateName={params.cn}
-          advisorName={params.an}
+          candidateName={cn}
+          advisorName={an}
           interviewMethod={methodLabel}
         />
       </div>
