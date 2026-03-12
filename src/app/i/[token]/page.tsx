@@ -8,9 +8,9 @@ const METHOD_LABELS: Record<string, string> = {
 };
 
 interface ScheduleLinkData {
-  candidate_name: string;
-  advisor_name: string;
-  interview_method: string;
+  candidateName: string;
+  advisorName: string;
+  interviewMethod: string;
 }
 
 async function fetchScheduleLink(
@@ -42,11 +42,11 @@ export default async function ShortLinkPage({
   const { token } = await params;
   const data = await fetchScheduleLink(token);
 
-  if (!data || !METHOD_LABELS[data.interview_method]) {
+  if (!data || !METHOD_LABELS[data.interviewMethod]) {
     return <ErrorView />;
   }
 
-  const methodLabel = METHOD_LABELS[data.interview_method];
+  const methodLabel = METHOD_LABELS[data.interviewMethod];
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -69,8 +69,8 @@ export default async function ShortLinkPage({
         </div>
 
         <InterviewScheduleForm
-          candidateName={data.candidate_name}
-          advisorName={data.advisor_name}
+          candidateName={data.candidateName}
+          advisorName={data.advisorName}
           interviewMethod={methodLabel}
         />
       </div>
