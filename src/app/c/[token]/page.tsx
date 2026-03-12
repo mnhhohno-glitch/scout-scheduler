@@ -1,15 +1,9 @@
 import Image from "next/image";
 import { ConsultationScheduleForm } from "@/components/ConsultationScheduleForm";
 
-const METHOD_LABELS: Record<string, string> = {
-  phone: "電話",
-  online: "オンライン",
-};
-
 interface ScheduleLinkData {
   candidateName: string;
   advisorName: string;
-  interviewMethod: string;
 }
 
 async function fetchScheduleLink(
@@ -41,11 +35,9 @@ export default async function ConsultationPage({
   const { token } = await params;
   const data = await fetchScheduleLink(token);
 
-  if (!data || !METHOD_LABELS[data.interviewMethod]) {
+  if (!data) {
     return <ErrorView />;
   }
-
-  const methodLabel = METHOD_LABELS[data.interviewMethod];
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -70,7 +62,6 @@ export default async function ConsultationPage({
         <ConsultationScheduleForm
           candidateName={data.candidateName}
           advisorName={data.advisorName}
-          consultationMethod={methodLabel}
         />
       </div>
     </div>

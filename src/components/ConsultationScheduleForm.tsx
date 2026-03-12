@@ -7,8 +7,9 @@ import { ConsultationCompletionMessage } from "./ConsultationCompletionMessage";
 interface ConsultationScheduleFormProps {
   candidateName: string;
   advisorName: string;
-  consultationMethod: string;
 }
+
+const CONSULTATION_METHODS = ["電話", "オンライン"] as const;
 
 const EMPTY_SLOT: DateTimeSlot = {
   date: "",
@@ -48,8 +49,8 @@ const INPUT =
 export function ConsultationScheduleForm({
   candidateName,
   advisorName,
-  consultationMethod,
 }: ConsultationScheduleFormProps) {
+  const [consultationMethod, setConsultationMethod] = useState("");
   const [email, setEmail] = useState("");
   const [slot1, setSlot1] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
   const [slot2, setSlot2] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
@@ -63,6 +64,9 @@ export function ConsultationScheduleForm({
 
   function validate(): Record<string, string> {
     const e: Record<string, string> = {};
+
+    if (!consultationMethod)
+      e.consultationMethod = "ご希望の面談形式を選択してください";
 
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       e.email = "正しいメールアドレスを入力してください";
@@ -223,10 +227,35 @@ export function ConsultationScheduleForm({
 
         {/* 面談形式 */}
         <div className="mb-8">
-          <p className="mb-1 text-sm font-medium text-gray-700">面談形式</p>
-          <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900">
-            {consultationMethod}
+          <p className="mb-3 text-sm font-medium text-gray-700">
+            ご希望の面談形式
+            <span className="ml-2 inline-block rounded bg-red-500 px-1.5 py-0.5 text-xs text-white">
+              必須
+            </span>
           </p>
+          <div className="space-y-2">
+            {CONSULTATION_METHODS.map((f) => (
+              <label
+                key={f}
+                className="flex cursor-pointer items-center gap-2.5"
+              >
+                <input
+                  type="radio"
+                  name="consultationMethod"
+                  value={f}
+                  checked={consultationMethod === f}
+                  onChange={(e) => setConsultationMethod(e.target.value)}
+                  className="h-4 w-4 accent-blue-600"
+                />
+                <span className="text-sm text-gray-700">{f}</span>
+              </label>
+            ))}
+          </div>
+          {errors.consultationMethod && (
+            <p className="mt-1 text-sm text-red-500">
+              {errors.consultationMethod}
+            </p>
+          )}
         </div>
 
         {/* 希望日時 */}
