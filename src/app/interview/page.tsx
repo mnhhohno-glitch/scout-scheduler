@@ -15,8 +15,8 @@ interface DecodedParams {
 
 function decodeParams(d: string): DecodedParams | null {
   try {
-    const json = Buffer.from(d, "base64").toString("utf-8");
-    const parsed = JSON.parse(json);
+    const decoded = decodeURIComponent(escape(atob(d)));
+    const parsed = JSON.parse(decoded);
     if (!parsed.cn || !parsed.an || !parsed.im) return null;
     if (!METHOD_LABELS[parsed.im]) return null;
     return parsed as DecodedParams;
