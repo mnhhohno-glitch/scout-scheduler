@@ -7,7 +7,7 @@ export default function Home() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         <div className="mb-8 text-center">
           <Image
-            src="https://www.bizstudio.co.jp/_astro/logo.DhCSnz3e_Z1RU3J.webp"
+            src="/BIZSTUDIO_LOGOMARK_02.png"
             alt="BizStudio"
             width={200}
             height={48}
@@ -18,7 +18,9 @@ export default function Home() {
             面談日程のご希望
           </h1>
           <p className="mt-2 text-gray-600">
-            ご都合の良い日時をお選びください。
+            マイナビ転職よりご応募ありがとうございました。
+            <br />
+            ご都合の良い日時をお選びいただき面談希望日を提出してください。
           </p>
         </div>
 

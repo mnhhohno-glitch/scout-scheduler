@@ -53,6 +53,7 @@ export function ScheduleForm() {
   const [slot1, setSlot1] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
   const [slot2, setSlot2] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
   const [slot3, setSlot3] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
+  const [comment, setComment] = useState("");
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -133,6 +134,7 @@ export function ScheduleForm() {
           slot1,
           slot2: isSlotFilled(slot2) ? slot2 : null,
           slot3: isSlotFilled(slot3) ? slot3 : null,
+          comment: comment.trim() || null,
         }),
       });
 
@@ -306,8 +308,24 @@ export function ScheduleForm() {
         </div>
       </div>
 
-      {/* ── 同意・送信 ── */}
+      {/* ── ご連絡事項・同意・送信 ── */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="mb-6">
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            ご連絡事項
+            <span className="ml-2 inline-block rounded bg-gray-400 px-1.5 py-0.5 text-xs text-white">
+              任意
+            </span>
+          </label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="ご質問やご要望がございましたらご記入ください"
+            rows={4}
+            className={INPUT}
+          />
+        </div>
+
         <label className="mb-6 flex cursor-pointer items-start gap-2.5">
           <input
             type="checkbox"

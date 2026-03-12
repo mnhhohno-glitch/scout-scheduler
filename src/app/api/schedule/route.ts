@@ -22,6 +22,7 @@ interface ScheduleBody {
   slot1: DateTimeSlot;
   slot2: DateTimeSlot | null;
   slot3: DateTimeSlot | null;
+  comment: string | null;
 }
 
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
@@ -92,7 +93,8 @@ function buildInternalHtml(b: ScheduleBody): string {
     <p style="margin:0 0 12px;"><strong>■ 希望の面談形式</strong><br>${b.meetingFormat}</p>
     <p style="margin:0 0 12px;"><strong>■ 第1希望日時</strong><br>${fmtSlot(b.slot1)}</p>
     <p style="margin:0 0 12px;"><strong>■ 第2希望日時</strong><br>${fmtSlot(b.slot2)}</p>
-    <p style="margin:0;"><strong>■ 第3希望日時</strong><br>${fmtSlot(b.slot3)}</p>
+    <p style="margin:0 0 12px;"><strong>■ 第3希望日時</strong><br>${fmtSlot(b.slot3)}</p>
+    <p style="margin:0;"><strong>■ ご連絡事項</strong><br>${b.comment || "なし"}</p>
   </div>
 </div>`;
 }
