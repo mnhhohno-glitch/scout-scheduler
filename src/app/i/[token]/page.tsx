@@ -3,7 +3,7 @@ import { InterviewScheduleForm } from "@/components/InterviewScheduleForm";
 
 const METHOD_LABELS: Record<string, string> = {
   "in-person": "対面",
-  online: "オンライン（Google Meet等）",
+  online: "オンライン",
   flexible: "どちらでも可",
 };
 
