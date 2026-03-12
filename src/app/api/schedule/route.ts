@@ -123,8 +123,7 @@ function buildCandidateHtml(b: ScheduleBody): string {
   <hr style="border:none;border-top:1px solid #ddd;margin:24px 0;">
   <p style="font-size:13px;color:#888;">
     株式会社ビズスタジオ<br>
-    〒260-0028 千葉県千葉市中央区新町3-13 日本瑞穂ビル7F<br>
-    TEL: 043-306-3735<br>
+    〒102-0083 東京都千代田区麹町4-5-20 KSビル8階<br>
     https://www.bizstudio.co.jp<br><br>
     ※ このメールは自動送信です。本メールへの返信はできません。<br>
     ご不明点は agent@bizstudio.co.jp までご連絡ください。
