@@ -53,6 +53,22 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
+export async function sendLineWorksMessageWithMention(
+  text: string,
+  lineworksId: string | null,
+): Promise<void> {
+  if (lineworksId) {
+    const mentionText = `<m userId="${lineworksId}"> ` + text;
+    try {
+      await sendLineWorksMessage(mentionText);
+      return;
+    } catch (error) {
+      console.error("Mention message failed, falling back:", error);
+    }
+  }
+  await sendLineWorksMessage(text);
+}
+
 export async function sendLineWorksMessage(text: string): Promise<void> {
   const { botId, channelId } = getConfig();
   const accessToken = await getAccessToken();

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
-import { sendLineWorksMessage } from "@/lib/lineworks";
+import { sendLineWorksMessageWithMention } from "@/lib/lineworks";
+import { getStaffByName } from "@/lib/portal-api";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -157,7 +158,11 @@ export async function POST(request: Request) {
 
     const lineWorksPromise = (async () => {
       try {
-        await sendLineWorksMessage(buildLineWorksMessage(body));
+        const staff = await getStaffByName(body.advisorName);
+        await sendLineWorksMessageWithMention(
+          buildLineWorksMessage(body),
+          staff?.lineworksId || null,
+        );
       } catch (error) {
         console.error("LINE WORKS send error:", error);
       }
