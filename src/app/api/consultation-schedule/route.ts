@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { sendLineWorksMessageWithMention } from "@/lib/lineworks";
 import { getStaffByName } from "@/lib/portal-api";
+import { createPortalTask } from "@/lib/portal-task";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -184,7 +185,21 @@ export async function POST(request: Request) {
       }
     })();
 
-    await Promise.all([lineWorksPromise, emailPromise]);
+    const portalTaskPromise = createPortalTask({
+      type: "consultation",
+      candidateName: body.candidateName,
+      preferredDates: [
+        `第1希望: ${fmtSlot(body.slot1)}`,
+        `第2希望: ${fmtSlot(body.slot2)}`,
+        `第3希望: ${fmtSlot(body.slot3)}`,
+      ].join("\n"),
+      meetingFormat: body.consultationMethod,
+      email: body.email || undefined,
+      notes: body.comment || undefined,
+      advisorName: body.advisorName,
+    });
+
+    await Promise.all([lineWorksPromise, emailPromise, portalTaskPromise]);
 
     return Response.json({ success: true });
   } catch (error) {

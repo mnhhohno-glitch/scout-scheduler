@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { sendLineWorksMessage } from "@/lib/lineworks";
+import { createPortalTask } from "@/lib/portal-task";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -201,7 +202,20 @@ export async function POST(request: Request) {
       }
     })();
 
-    await Promise.all([emailPromise, lineWorksPromise]);
+    const portalTaskPromise = createPortalTask({
+      type: "mynavi_new",
+      candidateName: `${body.lastName} ${body.firstName}`,
+      preferredDates: [
+        `第1希望: ${fmtSlot(body.slot1)}`,
+        `第2希望: ${fmtSlot(body.slot2)}`,
+        `第3希望: ${fmtSlot(body.slot3)}`,
+      ].join("\n"),
+      meetingFormat: body.meetingFormat,
+      email: body.email || undefined,
+      notes: body.comment || undefined,
+    });
+
+    await Promise.all([emailPromise, lineWorksPromise, portalTaskPromise]);
 
     return Response.json({ success: true });
   } catch (error) {
