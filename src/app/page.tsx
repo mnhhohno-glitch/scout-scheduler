@@ -24,7 +24,7 @@ export default function Home() {
           </p>
         </div>
 
-        <ScheduleForm />
+        <ScheduleForm source="マイナビ転職" />
       </div>
     </div>
   );

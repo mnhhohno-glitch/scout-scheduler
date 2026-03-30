@@ -7,6 +7,7 @@ interface CreateTaskParams {
   notes?: string;
   advisorName?: string;
   candidateId?: string;
+  source?: string;
 }
 
 export async function createPortalTask(

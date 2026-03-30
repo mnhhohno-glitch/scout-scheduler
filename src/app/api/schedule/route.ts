@@ -25,6 +25,7 @@ interface ScheduleBody {
   slot2: DateTimeSlot | null;
   slot3: DateTimeSlot | null;
   comment: string | null;
+  source: string | null;
 }
 
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
@@ -136,8 +137,11 @@ function buildCandidateHtml(b: ScheduleBody): string {
 }
 
 function buildLineWorksMessage(b: ScheduleBody): string {
+  const header = b.source
+    ? `📅 面談希望日が届きました（${b.source}）`
+    : "📅 面談希望日が届きました";
   return [
-    "📅 面談希望日が届きました",
+    header,
     "",
     "■ 氏名",
     `${b.lastName} ${b.firstName}`,
@@ -213,6 +217,7 @@ export async function POST(request: Request) {
       meetingFormat: body.meetingFormat,
       email: body.email || undefined,
       notes: body.comment || undefined,
+      source: body.source || undefined,
     });
 
     await Promise.all([emailPromise, lineWorksPromise, portalTaskPromise]);

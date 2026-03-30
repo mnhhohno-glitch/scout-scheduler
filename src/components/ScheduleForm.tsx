@@ -45,7 +45,7 @@ function slotsIdentical(a: DateTimeSlot, b: DateTimeSlot) {
 const INPUT =
   "w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none";
 
-export function ScheduleForm() {
+export function ScheduleForm({ source }: { source?: string }) {
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
@@ -135,6 +135,7 @@ export function ScheduleForm() {
           slot2: isSlotFilled(slot2) ? slot2 : null,
           slot3: isSlotFilled(slot3) ? slot3 : null,
           comment: comment.trim() || null,
+          source: source || null,
         }),
       });
 

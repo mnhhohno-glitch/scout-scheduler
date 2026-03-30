@@ -24,7 +24,7 @@ export default function AgentPage() {
           </p>
         </div>
 
-        <ScheduleForm />
+        <ScheduleForm source="マイナビエージェント" />
       </div>
     </div>
   );
