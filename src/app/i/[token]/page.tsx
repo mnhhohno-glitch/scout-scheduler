@@ -5,6 +5,10 @@ const METHOD_LABELS: Record<string, string> = {
   "in-person": "対面",
   online: "オンライン",
   flexible: "どちらでも可",
+  // 日本語値で保存されたレコードへの互換対応
+  "対面": "対面",
+  "オンライン": "オンライン",
+  "どちらでも可": "どちらでも可",
 };
 
 interface ScheduleLinkData {
