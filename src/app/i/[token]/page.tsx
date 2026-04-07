@@ -30,7 +30,10 @@ async function fetchScheduleLink(
     const res = await fetch(`${baseUrl}/api/schedule-links/${token}`, {
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`Schedule link API error: ${res.status} ${res.statusText} for token=${token}`);
+      return null;
+    }
     return await res.json();
   } catch (error) {
     console.error("Failed to fetch schedule link:", error);
@@ -47,6 +50,7 @@ export default async function ShortLinkPage({
   const data = await fetchScheduleLink(token);
 
   if (!data || !METHOD_LABELS[data.interviewMethod]) {
+    console.error("Invalid schedule link data:", { token, data });
     return <ErrorView />;
   }
 
