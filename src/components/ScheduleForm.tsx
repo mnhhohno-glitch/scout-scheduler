@@ -285,6 +285,13 @@ export function ScheduleForm({ source }: { source?: string }) {
           )}
         </div>
 
+        {/* 複数日程のお願い */}
+        <p className="mb-6 text-[0.85rem] leading-relaxed text-red-600">
+          ※スムーズな日程調整のため、<span className="font-bold">【複数日程・幅広い時間帯】</span>でのご記入にご協力をお願いいたします。
+          <br />
+          （1日のみ・短時間のみのご指定ですと、調整が難しい場合がございます）
+        </p>
+
         {/* 希望日時 */}
         <div className="space-y-6">
           <DateTimePicker
