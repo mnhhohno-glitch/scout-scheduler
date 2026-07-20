@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { sendLineWorksMessage } from "@/lib/lineworks";
 import { createPortalTask } from "@/lib/portal-task";
+import { sanitizeCid } from "@/lib/cid";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -26,6 +27,7 @@ interface ScheduleBody {
   slot3: DateTimeSlot | null;
   comment: string | null;
   source: string | null;
+  candidateId?: string;
 }
 
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
@@ -206,6 +208,7 @@ export async function POST(request: Request) {
       }
     })();
 
+    const candidateId = sanitizeCid(body.candidateId);
     const portalTaskPromise = createPortalTask({
       type: "mynavi_new",
       candidateName: `${body.lastName} ${body.firstName}`,
@@ -218,6 +221,7 @@ export async function POST(request: Request) {
       email: body.email || undefined,
       notes: body.comment || undefined,
       source: body.source || undefined,
+      ...(candidateId ? { candidateId } : {}),
     });
 
     await Promise.all([emailPromise, lineWorksPromise, portalTaskPromise]);

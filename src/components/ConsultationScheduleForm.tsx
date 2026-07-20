@@ -7,6 +7,7 @@ import { ConsultationCompletionMessage } from "./ConsultationCompletionMessage";
 interface ConsultationScheduleFormProps {
   candidateName: string;
   advisorName: string;
+  candidateId?: string;
 }
 
 const CONSULTATION_METHODS = ["電話", "オンライン"] as const;
@@ -49,6 +50,7 @@ const INPUT =
 export function ConsultationScheduleForm({
   candidateName,
   advisorName,
+  candidateId,
 }: ConsultationScheduleFormProps) {
   const [consultationMethod, setConsultationMethod] = useState("");
   const [email, setEmail] = useState("");
@@ -136,6 +138,7 @@ export function ConsultationScheduleForm({
           slot2: isSlotFilled(slot2) ? slot2 : null,
           slot3: isSlotFilled(slot3) ? slot3 : null,
           comment: comment.trim() || null,
+          ...(candidateId ? { candidateId } : {}),
         }),
       });
 

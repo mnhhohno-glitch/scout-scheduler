@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { InterviewScheduleForm } from "@/components/InterviewScheduleForm";
+import { sanitizeCid } from "@/lib/cid";
 
 const METHOD_LABELS: Record<string, string> = {
   "in-person": "対面",
@@ -43,10 +44,13 @@ async function fetchScheduleLink(
 
 export default async function ShortLinkPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { token } = await params;
+  const { cid } = await searchParams;
   const data = await fetchScheduleLink(token);
 
   if (!data || !METHOD_LABELS[data.interviewMethod]) {
@@ -55,6 +59,7 @@ export default async function ShortLinkPage({
   }
 
   const methodLabel = METHOD_LABELS[data.interviewMethod];
+  const candidateId = sanitizeCid(typeof cid === "string" ? cid : undefined);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -80,6 +85,7 @@ export default async function ShortLinkPage({
           candidateName={data.candidateName}
           advisorName={data.advisorName}
           interviewMethod={methodLabel}
+          candidateId={candidateId}
         />
       </div>
     </div>

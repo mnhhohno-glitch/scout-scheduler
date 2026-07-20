@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ConsultationScheduleForm } from "@/components/ConsultationScheduleForm";
+import { sanitizeCid } from "@/lib/cid";
 
 interface ScheduleLinkData {
   candidateName: string;
@@ -29,15 +30,20 @@ async function fetchScheduleLink(
 
 export default async function ConsultationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { token } = await params;
+  const { cid } = await searchParams;
   const data = await fetchScheduleLink(token);
 
   if (!data) {
     return <ErrorView />;
   }
+
+  const candidateId = sanitizeCid(typeof cid === "string" ? cid : undefined);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -62,6 +68,7 @@ export default async function ConsultationPage({
         <ConsultationScheduleForm
           candidateName={data.candidateName}
           advisorName={data.advisorName}
+          candidateId={candidateId}
         />
       </div>
     </div>

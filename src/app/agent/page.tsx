@@ -1,7 +1,15 @@
 import Image from "next/image";
 import { ScheduleForm } from "@/components/ScheduleForm";
+import { sanitizeCid } from "@/lib/cid";
 
-export default function AgentPage() {
+export default async function AgentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { cid } = await searchParams;
+  const candidateId = sanitizeCid(typeof cid === "string" ? cid : undefined);
+
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
@@ -24,7 +32,7 @@ export default function AgentPage() {
           </p>
         </div>
 
-        <ScheduleForm source="マイナビエージェント" />
+        <ScheduleForm source="マイナビエージェント" candidateId={candidateId} />
       </div>
     </div>
   );

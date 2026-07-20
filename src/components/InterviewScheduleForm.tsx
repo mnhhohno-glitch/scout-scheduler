@@ -8,6 +8,7 @@ interface InterviewScheduleFormProps {
   candidateName: string;
   advisorName: string;
   interviewMethod: string;
+  candidateId?: string;
 }
 
 const EMPTY_SLOT: DateTimeSlot = {
@@ -49,6 +50,7 @@ export function InterviewScheduleForm({
   candidateName,
   advisorName,
   interviewMethod,
+  candidateId,
 }: InterviewScheduleFormProps) {
   const [email, setEmail] = useState("");
   const [slot1, setSlot1] = useState<DateTimeSlot>({ ...EMPTY_SLOT });
@@ -132,6 +134,7 @@ export function InterviewScheduleForm({
           slot2: isSlotFilled(slot2) ? slot2 : null,
           slot3: isSlotFilled(slot3) ? slot3 : null,
           comment: comment.trim() || null,
+          ...(candidateId ? { candidateId } : {}),
         }),
       });
 

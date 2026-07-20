@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { InterviewScheduleForm } from "@/components/InterviewScheduleForm";
+import { sanitizeCid } from "@/lib/cid";
 
 const METHOD_LABELS: Record<string, string> = {
   "in-person": "対面",
@@ -12,7 +13,7 @@ export default async function InterviewPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { cn, an, im } = await searchParams;
+  const { cn, an, im, cid } = await searchParams;
 
   if (
     !cn || typeof cn !== "string" ||
@@ -24,6 +25,7 @@ export default async function InterviewPage({
   }
 
   const methodLabel = METHOD_LABELS[im];
+  const candidateId = sanitizeCid(typeof cid === "string" ? cid : undefined);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -49,6 +51,7 @@ export default async function InterviewPage({
           candidateName={cn}
           advisorName={an}
           interviewMethod={methodLabel}
+          candidateId={candidateId}
         />
       </div>
     </div>
