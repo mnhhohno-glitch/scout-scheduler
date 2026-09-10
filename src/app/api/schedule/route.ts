@@ -2,6 +2,11 @@ import { Resend } from "resend";
 import { sendLineWorksMessage } from "@/lib/lineworks";
 import { createPortalTask } from "@/lib/portal-task";
 import { sanitizeCid } from "@/lib/cid";
+import {
+  isSlotAllowed,
+  jstNow,
+  SLOT_RULE_ERROR_MESSAGE,
+} from "@/lib/schedule-rules";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -52,6 +57,8 @@ function toMinutes(h: string, m: string) {
 
 function validateBody(body: ScheduleBody): string | null {
   const { lastName, firstName, email, meetingFormat, slot1 } = body;
+  // 判定の「現在」は送信を受け取った時刻（JST）
+  const now = jstNow();
 
   if (!lastName?.trim() || !firstName?.trim() || !email?.trim() || !meetingFormat) {
     return "必須項目を入力してください";
@@ -74,6 +81,18 @@ function validateBody(body: ScheduleBody): string | null {
   ) {
     return "終了時間は開始時間より後にしてください";
   }
+  if (
+    !isSlotAllowed(
+      slot1.date,
+      slot1.startHour,
+      slot1.startMinute,
+      slot1.endHour,
+      slot1.endMinute,
+      now,
+    )
+  ) {
+    return SLOT_RULE_ERROR_MESSAGE;
+  }
 
   for (const s of [body.slot2, body.slot3]) {
     if (s) {
@@ -82,6 +101,18 @@ function validateBody(body: ScheduleBody): string | null {
         toMinutes(s.startHour, s.startMinute)
       ) {
         return "終了時間は開始時間より後にしてください";
+      }
+      if (
+        !isSlotAllowed(
+          s.date,
+          s.startHour,
+          s.startMinute,
+          s.endHour,
+          s.endMinute,
+          now,
+        )
+      ) {
+        return SLOT_RULE_ERROR_MESSAGE;
       }
     }
   }

@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { DateTimePicker, type DateTimeSlot } from "./DateTimePicker";
 import { CompletionMessage } from "./CompletionMessage";
+import {
+  isSlotAllowed,
+  jstNow,
+  SLOT_RULE_ERROR_MESSAGE,
+} from "@/lib/schedule-rules";
 
 const EMPTY_SLOT: DateTimeSlot = {
   date: "",
@@ -67,6 +72,7 @@ export function ScheduleForm({
 
   function validate(): Record<string, string> {
     const e: Record<string, string> = {};
+    const now = jstNow();
 
     if (!lastName.trim()) e.lastName = "お名前（姓）を入力してください";
     if (!firstName.trim()) e.firstName = "お名前（名）を入力してください";
@@ -84,6 +90,17 @@ export function ScheduleForm({
       toMinutes(slot1.startHour, slot1.startMinute)
     ) {
       e.slot1 = "終了時間は開始時間より後にしてください";
+    } else if (
+      !isSlotAllowed(
+        slot1.date,
+        slot1.startHour,
+        slot1.startMinute,
+        slot1.endHour,
+        slot1.endMinute,
+        now,
+      )
+    ) {
+      e.slot1 = SLOT_RULE_ERROR_MESSAGE;
     }
 
     for (const [key, slot] of [
@@ -98,6 +115,17 @@ export function ScheduleForm({
           toMinutes(slot.startHour, slot.startMinute)
         ) {
           e[key] = "終了時間は開始時間より後にしてください";
+        } else if (
+          !isSlotAllowed(
+            slot.date,
+            slot.startHour,
+            slot.startMinute,
+            slot.endHour,
+            slot.endMinute,
+            now,
+          )
+        ) {
+          e[key] = SLOT_RULE_ERROR_MESSAGE;
         }
       }
     }
@@ -298,6 +326,8 @@ export function ScheduleForm({
             ※スムーズな日程調整のため、<span className="font-bold">【複数日程・幅広い時間帯】</span>でのご記入にご協力をお願いいたします。
             <br />
             （1日のみ・短時間のみのご指定ですと、調整が難しい場合がございます）
+            <br />
+            ※日曜・祝日はご予約いただけません。開始時間は9:00〜20:00でお選びください。当日のご予約は、現在時刻から3時間後以降の時間でお選びください。
           </p>
         </div>
 
@@ -306,18 +336,21 @@ export function ScheduleForm({
           <DateTimePicker
             label="第1希望日時"
             required
+            restrictRules
             value={slot1}
             onChange={setSlot1}
             error={errors.slot1}
           />
           <DateTimePicker
             label="第2希望日時"
+            restrictRules
             value={slot2}
             onChange={setSlot2}
             error={errors.slot2}
           />
           <DateTimePicker
             label="第3希望日時"
+            restrictRules
             value={slot3}
             onChange={setSlot3}
             error={errors.slot3}

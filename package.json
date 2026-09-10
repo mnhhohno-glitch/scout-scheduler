@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@holiday-jp/holiday_jp": "^2.5.1",
     "jsonwebtoken": "^9.0.3",
     "next": "16.1.6",
     "react": "19.2.3",
