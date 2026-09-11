@@ -304,8 +304,8 @@ export async function POST(request: Request) {
             to: body.email,
             replyTo: "agent@bizstudio.co.jp",
             subject: reserved
-              ? "【株式会社ビズスタジオ】面談日時のご案内"
-              : "【株式会社ビズスタジオ】面談希望日を受け付けました",
+              ? `${body.lastName} ${body.firstName}様｜面談日時のご案内【株式会社ビズスタジオ】`
+              : `${body.lastName} ${body.firstName}様｜面談希望日を受け付けました【株式会社ビズスタジオ】`,
             html: reserved
               ? buildReservedCandidateHtml(body, reserved.label, reserved.method)
               : buildCandidateHtml(body),
