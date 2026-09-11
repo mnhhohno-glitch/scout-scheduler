@@ -8,18 +8,46 @@ interface CreateTaskParams {
   advisorName?: string;
   candidateId?: string;
   source?: string;
+  autoReserve?: boolean;
+}
+
+export interface AutoReserveSlot {
+  start: string;
+  end: string;
+  label: string;
+}
+
+export interface AutoReserveResult {
+  result: "reserved" | "not_reserved";
+  slot?: AutoReserveSlot;
+  method?: string;
+  reason?: string;
+}
+
+export interface PortalTaskResponse {
+  taskId?: string;
+  taskTitle?: string;
+  autoReserve?: AutoReserveResult;
 }
 
 export async function createPortalTask(
   params: CreateTaskParams,
-): Promise<void> {
+  options?: { timeoutMs?: number },
+): Promise<PortalTaskResponse | null> {
   const apiUrl = process.env.PORTAL_TASK_API_URL;
   const apiSecret = process.env.PORTAL_TASK_API_SECRET;
 
   if (!apiUrl || !apiSecret) {
     console.error("Portal task API URL or secret is not configured");
-    return;
+    return null;
   }
+
+  const timeoutMs = options?.timeoutMs;
+  const controller = timeoutMs ? new AbortController() : null;
+  const timer =
+    controller && timeoutMs
+      ? setTimeout(() => controller.abort(), timeoutMs)
+      : null;
 
   try {
     const response = await fetch(apiUrl, {
@@ -29,6 +57,7 @@ export async function createPortalTask(
         "x-api-secret": apiSecret,
       },
       body: JSON.stringify(params),
+      ...(controller ? { signal: controller.signal } : {}),
     });
 
     if (!response.ok) {
@@ -38,11 +67,16 @@ export async function createPortalTask(
         response.status,
         errorData,
       );
-    } else {
-      const data = await response.json();
-      console.log("Portal task created:", data.taskId, data.taskTitle);
+      return null;
     }
+
+    const data = (await response.json()) as PortalTaskResponse;
+    console.log("Portal task created:", data.taskId, data.taskTitle);
+    return data;
   } catch (error) {
     console.error("Error creating portal task:", error);
+    return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }

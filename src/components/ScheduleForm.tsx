@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DateTimePicker, type DateTimeSlot } from "./DateTimePicker";
-import { CompletionMessage } from "./CompletionMessage";
+import { CompletionMessage, type ReservedInfo } from "./CompletionMessage";
 import {
   isSlotAllowed,
   jstNow,
@@ -68,6 +68,7 @@ export function ScheduleForm({
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [reserved, setReserved] = useState<ReservedInfo | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   function validate(): Record<string, string> {
@@ -174,11 +175,13 @@ export function ScheduleForm({
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || "送信に失敗しました");
       }
 
+      setReserved(data.reserved ?? null);
       setIsCompleted(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
@@ -193,7 +196,7 @@ export function ScheduleForm({
     }
   }
 
-  if (isCompleted) return <CompletionMessage />;
+  if (isCompleted) return <CompletionMessage reserved={reserved} />;
 
   return (
     <form onSubmit={handleSubmit} noValidate>
