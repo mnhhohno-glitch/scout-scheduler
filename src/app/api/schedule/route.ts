@@ -9,6 +9,9 @@ import {
   SLOT_RULE_ERROR_MESSAGE,
 } from "@/lib/schedule-rules";
 
+// portal の自動仮確定を最大12秒待つため、既定（10〜15秒）より長い上限を明示する
+export const maxDuration = 30;
+
 function getResend() {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new Error("RESEND_API_KEY is not configured");
