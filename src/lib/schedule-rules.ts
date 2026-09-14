@@ -6,7 +6,8 @@ import holidayJp from "@holiday-jp/holiday_jp";
  * - 日曜・祝日（振替休日を含む）は不可
  * - 開始時刻は 9:00〜20:00（20:00 開始が最後）
  * - 終了時刻は 21:00 まで
- * - 当日は「現在時刻＋3時間」以降の開始時刻のみ
+ * - 申込時点の翌営業日（日曜・祝日でない最初の日。土曜は営業日）11:00 以降のみ
+ * - 金曜17:00以降の申込は翌日の土曜を飛ばし、その次の営業日を下限日にする
  *
  * 「今日」「曜日」「現在時刻」はすべて JST（Asia/Tokyo）で明示的に判定する。
  * サーバー（Vercel=UTC）とブラウザで結果が変わらないこと。
@@ -21,15 +22,17 @@ export const START_MIN_OF_DAY = 9 * 60;
 export const START_MAX_OF_DAY = 20 * 60;
 /** 終了時刻の最大（分／0時起点）: 21:00 */
 export const END_MAX_OF_DAY = 21 * 60;
-/** 当日予約に必要なリードタイム（分）: 3時間 */
-export const SAME_DAY_LEAD_MINUTES = 180;
+/** 下限日（翌営業日）の開始時刻の最小（分／0時起点）: 11:00 */
+export const LIMIT_DAY_START_MIN_OF_DAY = 11 * 60;
+/** 翌日の土曜を下限日にしない金曜の締め（分／0時起点）: 17:00 */
+export const FRIDAY_SKIP_SATURDAY_MINUTES = 17 * 60;
 /** 選択できる日数（当日を含む） */
 export const DATE_RANGE_DAYS = 60;
 /** 時刻の刻み（分） */
 export const SLOT_STEP_MINUTES = 15;
 
 export const SLOT_RULE_ERROR_MESSAGE =
-  "選択された日時はご予約いただけません。お手数ですが日時を選び直してください。（日曜・祝日は不可、開始は9:00〜20:00、当日は3時間後以降の時間のみ受け付けています）";
+  "選択された日時はご予約いただけません。お手数ですが日時を選び直してください。（日曜・祝日は不可、開始は9:00〜20:00、翌営業日11:00以降のみ受け付けています）";
 
 export interface JstNow {
   /** JST の年 */
@@ -120,20 +123,39 @@ function toNumber(v: string | number): number {
 }
 
 /**
+ * 申込時点から見た「翌営業日」＝予約できる最初の日（下限日）の "YYYY-MM-DD"。
+ *
+ * - 翌日から数えて最初の「日曜・祝日でない日」（土曜は営業日として扱う）
+ * - ただし金曜17:00以降（JST）の申込では翌日の土曜を飛ばし、その次の営業日にする
+ */
+export function earliestSelectableDate(now: JstNow = jstNow()): string {
+  const skipTomorrowSaturday =
+    dayOfWeek(now.dateStr) === 5 &&
+    now.minutesOfDay >= FRIDAY_SKIP_SATURDAY_MINUTES;
+
+  let date = addDays(now.dateStr, skipTomorrowSaturday ? 2 : 1);
+  // 連休が続いても必ず抜けられるよう上限を置く
+  for (let i = 0; i < DATE_RANGE_DAYS && isBlockedDate(date); i++) {
+    date = addDays(date, 1);
+  }
+  return date;
+}
+
+/**
  * その日付で選択できる開始時刻（0時起点の分）の一覧。
- * ブロック日・過去日は空配列。当日は「現在＋3時間」以降のみ。
+ * ブロック日・下限日より前は空配列。下限日は 11:00 以降、それ以降の日は 9:00 から。
  */
 export function allowedStartMinutesOfDay(
   dateStr: string,
   now: JstNow = jstNow(),
 ): number[] {
   if (isBlockedDate(dateStr)) return [];
-  if (dateStr < now.dateStr) return [];
+
+  const limitDate = earliestSelectableDate(now);
+  if (dateStr < limitDate) return [];
 
   const earliest =
-    dateStr === now.dateStr
-      ? Math.max(START_MIN_OF_DAY, now.minutesOfDay + SAME_DAY_LEAD_MINUTES)
-      : START_MIN_OF_DAY;
+    dateStr === limitDate ? LIMIT_DAY_START_MIN_OF_DAY : START_MIN_OF_DAY;
 
   const result: number[] = [];
   for (
@@ -157,7 +179,7 @@ export function isSelectableDate(
 /**
  * 日時枠がルールを満たすか。
  * ブロック日でない かつ 開始 9:00〜20:00 かつ 終了 ≤ 21:00 かつ 終了 > 開始
- * かつ 当日なら開始 ≥ 現在＋3時間。
+ * かつ 下限日（翌営業日）以降で、下限日なら開始 ≥ 11:00。
  */
 export function isSlotAllowed(
   dateStr: string,
@@ -187,7 +209,7 @@ export function isSlotAllowed(
 
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 
-/** 選択できる日付の一覧（当日から60日先まで、日曜・祝日・当日枠切れを除く）。 */
+/** 選択できる日付の一覧（当日から60日先まで、日曜・祝日・下限日より前を除く）。 */
 export function selectableDateOptions(
   now: JstNow = jstNow(),
 ): { value: string; label: string }[] {

@@ -44,6 +44,10 @@ const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 // portal の自動仮確定の待ち時間。超えたら現行どおり「希望日を受け付けました」に倒す
 const PORTAL_TIMEOUT_MS = 12000;
 
+// 求職者宛メールの BCC 先。CANDIDATE_MAIL_BCC があればそれを優先する
+const CANDIDATE_MAIL_BCC =
+  process.env.CANDIDATE_MAIL_BCC || "agent@bizstudio.co.jp";
+
 interface ReservedInfo {
   label: string;
   method: string;
@@ -198,7 +202,7 @@ function buildCandidateHtml(b: ScheduleBody): string {
     <p style="margin:0 0 8px;"><strong>■ 第2希望日時</strong><br>${fmtSlot(b.slot2)}</p>
     <p style="margin:0;"><strong>■ 第3希望日時</strong><br>${fmtSlot(b.slot3)}</p>
   </div>
-  <p>担当者より <strong>1営業日以内</strong> に正式な日程をご連絡いたします。<br>今しばらくお待ちくださいませ。</p>
+  <p>担当者より改めて、正式な日程をご連絡いたします。<br>今しばらくお待ちくださいませ。</p>
 ${CANDIDATE_MAIL_FOOTER}
 </div>`;
 }
@@ -303,6 +307,7 @@ export async function POST(request: Request) {
             from: "株式会社ビズスタジオ <no-reply@bizstudio.co.jp>",
             to: body.email,
             replyTo: "agent@bizstudio.co.jp",
+            bcc: CANDIDATE_MAIL_BCC,
             subject: reserved
               ? `${body.lastName} ${body.firstName}様｜面談日時のご案内【株式会社ビズスタジオ】`
               : `${body.lastName} ${body.firstName}様｜面談希望日を受け付けました【株式会社ビズスタジオ】`,
